@@ -1,7 +1,7 @@
 const express = require("express")
 const controller = express.Router()
-const { uuid } = require('uuidv4');
-let products = require("../data/simulated_database")
+const { v4: uuidv4 } = require('uuid');
+let products = []
 
 controller.post("/", (req, res) => {
     let product = {
@@ -11,7 +11,8 @@ controller.post("/", (req, res) => {
         name: req.body.name,
         description: req.body.description
     }
-    users.push({ ...product, id: uuid() })
+    const productId = uuidv4()
+    products.push({ ...product, articleNumber: productId })
     res.status(201).json(product)
 })
 
@@ -21,7 +22,7 @@ controller.get("/", (req, res) => {
 
 controller.get("/:articleNumber", (req, res) => {
     if (req != undefined) {
-        res.status(200).send(req.user)
+        res.status(200).send(req.product)
     } else {
         res.status(404).json()
     }
