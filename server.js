@@ -11,7 +11,9 @@ app.use(bodyparser.json())
 
 
 const usersController = require("./controllers/usersController")
+const productsController = require("./controllers/productsController")
 app.use("/api/users", usersController)
+app.use("/api/products", productsController)
 
 app.listen(port, () => {
     console.log(`Server is running on http://localhost:${port}`);
