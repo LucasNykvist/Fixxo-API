@@ -1,62 +1,92 @@
 const express = require("express")
+const mongoose = require("mongoose")
 const controller = express.Router()
-const { v4: uuidv4 } = require('uuid');
-let products = []
+const Product = require("../models/productModel")
 
-controller.post("/", (req, res) => {
-    let product = {
-        imageName: req.body.imageName,
+// Find Product Middleware Function
+const getProduct = async (req, res, next) => {
+    let product;
+    try {
+        product = await Product.findById(req.params.id)
+        if (product == null) {
+            return res.status(404)
+        }
+    } catch (error) {
+        return res.status(500).json({ message: error.message })
+    }
+
+    res.product = product
+    next()
+}
+
+// Read All
+controller.get("/", async (req, res) => {
+    try {
+        const products = await Product.find()
+        res.send(products)
+    } catch (error) {
+        res.status(500).json({ message: error.message })
+    }
+})
+
+// Read Specific
+controller.get("/:id", getProduct, (req, res) => {
+    res.json(res.product)
+})
+
+// Create
+controller.post("/", async (req, res) => {
+    const product = new Product({
         category: req.body.category,
-        price: req.body.price,
+        description: req.body.description,
+        imageName: req.body.imageName,
         name: req.body.name,
-        description: req.body.description
-    }
-    const productId = uuidv4()
-    products.push({ ...product, articleNumber: productId })
-    res.status(201).json(product)
-})
+        price: req.body.price
+    })
 
-controller.get("/", (req, res) => {
-    res.status(200).json(products)
-})
-
-controller.get("/:articleNumber", (req, res) => {
-    if (req != undefined) {
-        res.status(200).send(req.product)
-    } else {
-        res.status(404).json()
+    try {
+        const newProduct = await product.save()
+        res.json(newProduct).status(201)
+    } catch (error) {
+        res.status(400).json({ message: error.message })
     }
 })
 
-controller.put("/:articleNumber", (req, res) => {
-    const { articleNumber } = req.params
+// Update
+controller.put("/:id", getProduct, async (req, res) => {
+    if (req.body.category != null) {
+        res.product.category = req.body.category
+    }
+    if (req.body.description != null) {
+        res.product.description = req.body.description
+    }
+    if (req.body.imageName != null) {
+        res.product.imageName = req.body.imageName
+    }
+    if (req.body.name != null) {
+        res.product.name = req.body.name
+    }
+    if (req.body.price != null) {
+        res.product.price = req.body.price
+    }
 
-    const { imageName, category, price, name, description } = req.body
 
-    const foundProduct = products.find((product) => product.articleNumber === articleNumber)
-
-    if (imageName) {
-        foundProduct.imageName = imageName
+    try {
+        const updatedProduct = await res.product.save()
+        res.status(200).json(updatedProduct)
+    } catch (error) {
+        res.status(400).json({ message: error.message })
     }
-    if (category) {
-        foundProduct.category = category
-    }
-    if (price) {
-        foundProduct.price = price
-    }
-    if (name) {
-        foundProduct.name = name
-    }
-    if (description) {
-        foundProduct.description = description
-    }
-    res.status(200)
 })
 
-controller.delete("/:articleNumber", (req, res) => {
-    const { articleNumber } = req.params
-    products = products.filter((product) => product.articleNumber !== articleNumber)
-    res.status(202).send(`Product with article number ${articleNumber} was deleted`)
+// Delete
+controller.delete("/:id", getProduct, async (req, res) => {
+    try {
+        await res.product.remove()
+        res.json({ message: "Product Removed" })
+    } catch (error) {
+        res.status(500).json({ message: error.message })
+    }
 })
 
 module.exports = controller
