@@ -3,6 +3,7 @@ const mongoose = require("mongoose")
 const controller = express.Router()
 const Product = require("../models/productModel")
 
+// Middleware
 // Find Product Middleware Function
 const getProduct = async (req, res, next) => {
     let product;
@@ -19,6 +20,7 @@ const getProduct = async (req, res, next) => {
     next()
 }
 
+// Routes
 // Read All
 controller.get("/", async (req, res) => {
     try {
@@ -34,6 +36,16 @@ controller.get("/:id", getProduct, (req, res) => {
     res.json(res.product)
 })
 
+// Get All By Tag
+controller.get("/tag/:tag", async (req, res) => {
+    try {
+        const taggedProduct = await Product.find({ tag: req.params.tag })
+        res.json(taggedProduct).status(200)
+    } catch (error) {
+        res.json(404).message({ message: error.message })
+    }
+})
+
 // Create
 controller.post("/", async (req, res) => {
     const product = new Product({
@@ -41,7 +53,8 @@ controller.post("/", async (req, res) => {
         description: req.body.description,
         imageName: req.body.imageName,
         name: req.body.name,
-        price: req.body.price
+        price: req.body.price,
+        tag: req.body.tag
     })
 
     try {
@@ -68,6 +81,9 @@ controller.put("/:id", getProduct, async (req, res) => {
     }
     if (req.body.price != null) {
         res.product.price = req.body.price
+    }
+    if (req.body.tag != null) {
+        res.product.tag = req.body.tag
     }
 
 

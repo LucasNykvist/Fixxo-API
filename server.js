@@ -1,4 +1,4 @@
-// General Requirements
+// General Server Setup
 require("dotenv").config()
 const express = require("express")
 const mongoose = require("mongoose")
@@ -7,17 +7,15 @@ const cors = require("cors")
 const bodyparser = require("body-parser")
 const port = process.env.PORT || 5000
 
-
-// Connect Database
+// Connect To Database
 mongoose.connect(process.env.DATABASE_URI, () => {
     console.log("Connected to database...");
 })
 
 // Middleware
-app.use(cors())
-app.use(express.urlencoded({ extended: true }))
 app.use(bodyparser.json())
-
+app.use(express.urlencoded({ extended: true }))
+app.use(cors())
 
 // Controller Imports & Use
 const usersController = require("./controllers/usersController")
