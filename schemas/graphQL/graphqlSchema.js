@@ -14,7 +14,6 @@ const ProductType = new GraphQLObjectType({
         price: { type: GraphQLString },
         category: { type: GraphQLString },
         imageName: { type: GraphQLString },
-        name: { type: GraphQLString },
         tag: { type: GraphQLString },
         description: { type: GraphQLString },
     })
@@ -62,7 +61,7 @@ const Mutation = new GraphQLObjectType({
                     category: args.category,
                     imageName: args.imageName,
                     tag: args.tag,
-                    description: args.description,
+                    description: args.description
                 })
                 return product.save()
             }
@@ -74,6 +73,32 @@ const Mutation = new GraphQLObjectType({
             },
             resolve(parent, args) {
                 return Product.findByIdAndRemove(args._id)
+            }
+        },
+        updateProduct: {
+            type: ProductType,
+            args: {
+                _id: { type: GraphQLID },
+                name: { type: GraphQLString },
+                price: { type: GraphQLString },
+                category: { type: GraphQLString },
+                imageName: { type: GraphQLString },
+                tag: { type: GraphQLString },
+                description: { type: GraphQLString },
+            },
+            resolve(parent, args) {
+                return Product.findByIdAndUpdate(
+                    args._id,
+                    {
+                        name: args.name,
+                        price: args.price,
+                        category: args.category,
+                        imageName: args.imageName,
+                        tag: args.tag,
+                        description: args.description
+                    },
+                    { new: true }
+                )
             }
         }
     }
