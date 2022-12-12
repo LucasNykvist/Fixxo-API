@@ -4,8 +4,11 @@ const express = require("express")
 const mongoose = require("mongoose")
 const app = express()
 const cors = require("cors")
+const { graphqlHTTP } = require("express-graphql")
 const bodyparser = require("body-parser")
 const port = process.env.PORT || 5000
+
+
 
 // Connect To Database
 mongoose.connect(process.env.DATABASE_URI, () => {
@@ -17,11 +20,18 @@ app.use(bodyparser.json())
 app.use(express.urlencoded({ extended: true }))
 app.use(cors())
 
+
 // Controller Imports & Use
 const usersController = require("./controllers/usersController")
 app.use("/api/users", usersController)
 const productsController = require("./controllers/productsController")
 app.use("/api/products", productsController)
+
+// GraphQL UI
+app.use("/graphql", graphqlHTTP({
+    schema: require("./schemas/graphQL/graphqlSchema"),
+    graphiql: true,
+}))
 
 // Listen
 app.listen(port, () => {
