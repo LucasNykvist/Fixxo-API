@@ -1,90 +1,43 @@
 const express = require("express")
 const mongoose = require("mongoose")
 const controller = express.Router()
+const bcrypt = require("bcrypt")
+const jwt = require("jsonwebtoken")
 const User = require("../models/userModel")
 
-// Find User Middleware Function
-const getUser = async (req, res, next) => {
-    let user;
-    try {
-        user = await User.findById(req.params.id)
-        if (user == null) {
-            return res.status(404)
-        }
-    } catch (error) {
-        return res.status(500).json({ message: error.message })
-    }
-
-    res.user = user
-    next()
+// Funktion som skapar token
+const createToken = (_id) => {
+    return jwt.sign({ _id }, process.env.SECRET, { expiresIn: "3d" })
 }
 
-// Create User
-controller.post("/", async (req, res) => {
-    const user = new User({
-        firstName: req.body.firstName,
-        lastName: req.body.lastName,
-        age: req.body.age,
-        email: req.body.email,
-        password: req.body.password
-    })
+// Login Route
+controller.post("/login", async (req, res) => {
+    const { email, password } = req.body
 
     try {
-        const newUser = await user.save()
-        res.json(newUser).status(201)
-    } catch (error) {
-        res.status(500).json({ message: error.message })
+        const user = await User.login(email, password)
+
+        // Skapa en token
+        const token = createToken(user._id)
+
+        res.json({ email, token }).status(200)
+    } catch (Error) {
+        res.status(400).json({ message: Error.message })
     }
 })
-
-// Read All Users
-controller.get("/", async (req, res) => {
-    try {
-        const users = await User.find()
-        res.send(users).status(200)
-    } catch (error) {
-        res.status(500).json({ message: error.message })
-    }
-})
-
-
-// Read Specific User
-controller.get("/:id", getUser, (req, res) => {
-    res.json(res.user)
-})
-
-controller.put("/:id", getUser, async (req, res) => {
-    if (req.body.firstName != null) {
-        res.user.firstName = req.body.firstName
-    }
-    if (req.body.lastName != null) {
-        res.user.lastName = req.body.lastName
-    }
-    if (req.body.age != null) {
-        res.user.age = req.body.age
-    }
-    if (req.body.email != null) {
-        res.user.email = req.body.email
-    }
-    if (req.body.password != null) {
-        res.user.password = req.body.password
-    }
+// Signup Route
+controller.post("/signup", async (req, res) => {
+    const { email, password } = req.body
 
     try {
-        const updatedUser = await res.user.save()
-        res.status(200).json(updatedUser)
+        const user = await User.signup(email, password)
 
-    } catch (error) {
-        res.status(500).json({ message: error.message })
-    }
-})
+        // Skapa en token
+        const token = createToken(user._id)
 
-controller.delete("/:id", getUser, async (req, res) => {
-    try {
-        await res.user.remove()
-        res.json({ message: "User Removed" }).status(200)
-    } catch (error) {
-        res.status(500).json({ message: error.message })
+        res.json({ email, token }).status(200)
+    } catch (Error) {
+        res.status(400).json({ message: Error.message })
     }
 })
 

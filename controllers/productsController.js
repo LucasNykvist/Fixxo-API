@@ -2,6 +2,7 @@ const express = require("express")
 const mongoose = require("mongoose")
 const controller = express.Router()
 const Product = require("../models/productModel")
+const requireAuth = require("../middleware/requireAuth")
 
 // Middleware
 // Find Product Middleware Function
@@ -46,8 +47,12 @@ controller.get("/tag/:tag", async (req, res) => {
     }
 })
 
+// Applicerar enbart AUTH på de create,put och delete routes
+// Man måste alltså vara inloggade för att kunna modifiera de produkter som visas på webbsidan
+// Dock används inte dessa routes på grund av att graphQL används för att genomföra alla CRUD operationer
+
 // Create
-controller.post("/", async (req, res) => {
+controller.post("/", requireAuth, async (req, res) => {
     const product = new Product({
         category: req.body.category,
         description: req.body.description,
@@ -66,7 +71,7 @@ controller.post("/", async (req, res) => {
 })
 
 // Update
-controller.put("/:id", getProduct, async (req, res) => {
+controller.put("/:id", requireAuth, getProduct, async (req, res) => {
     if (req.body.category != null) {
         res.product.category = req.body.category
     }
@@ -96,7 +101,7 @@ controller.put("/:id", getProduct, async (req, res) => {
 })
 
 // Delete
-controller.delete("/:id", getProduct, async (req, res) => {
+controller.delete("/:id", requireAuth, getProduct, async (req, res) => {
     try {
         await res.product.remove()
         res.json({ message: "Product Removed" })
