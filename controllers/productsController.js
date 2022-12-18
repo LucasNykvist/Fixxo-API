@@ -47,7 +47,7 @@ controller.get("/tag/:tag", async (req, res) => {
     }
 })
 
-// Applicerar enbart AUTH på de create,put och delete routes
+// Applicerar enbart AUTH på create, put och delete routes
 // Man måste alltså vara inloggade för att kunna modifiera de produkter som visas på webbsidan
 // Dock används inte dessa routes på grund av att graphQL används för att genomföra alla CRUD operationer
 

@@ -37,3 +37,5 @@ app.use("/graphql", graphqlHTTP({
 app.listen(port, () => {
     console.log(`Server is running on http://localhost:${port}`);
 })
+
+module.exports = app

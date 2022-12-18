@@ -25,6 +25,7 @@ controller.post("/login", async (req, res) => {
         res.status(400).json({ message: Error.message })
     }
 })
+
 // Signup Route
 controller.post("/signup", async (req, res) => {
     const { email, password } = req.body
