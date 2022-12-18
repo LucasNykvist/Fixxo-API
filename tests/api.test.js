@@ -1,7 +1,7 @@
 const request = require("supertest")
 const app = require("../server")
 
-test('GET / should return a list of products', async () => {
+test('GET /api/products ska innehålla...', async () => {
     const res = await request(app).get('/api/products');
     expect(res.statusCode).toEqual(200);
     expect(res.body).toContainEqual({
@@ -17,6 +17,4 @@ test('GET / should return a list of products', async () => {
     });
 });
 
-// npm test för att köra testet
-
-
+// npm test för att köra testet - Kör JEST
